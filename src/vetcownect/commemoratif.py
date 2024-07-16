@@ -1,13 +1,27 @@
 import streamlit as st
 import csv
 
+# List of all the team members
+TEAM = ["Alice", "Bob"]
+
 
 def main():
-    st.title("Form App")
+    st.title("Commemoratif")
+
+    # Ask user if they want to create a new record
+    if st.button("Create new record"):
+        create_record()
+
+    # If not we display the existing records
+    else:
+        display_records()
+
+
+def create_record():
 
     # Text inputs
-    name = st.text_input("Name")
-    email = st.text_input("Email")
+    mise_en_culture_technicien = st.selectbox("Technicien", TEAM)
+    mise_en_culture_ts = st.date_input("Date de mise en culture")
 
     # Slider inputs
     age = st.slider("Age", 0, 100, 25)
