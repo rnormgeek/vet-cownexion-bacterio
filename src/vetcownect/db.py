@@ -1,67 +1,90 @@
 import sqlite3
+from vetcownect.log_config import get_logger
+from vetcownect.utils import connect_to_db
 
-# Define the database name
-database_name = "bacterio_db.db"
+# TODO: add the get_eleveurs function
 
-# Connect to the SQLite database
-conn = sqlite3.connect(database_name)
-
-# Create a cursor object
-cursor = conn.cursor()
+# Logger
+logger = get_logger(__name__)
 
 # SQL command to create a table
-create_commemoratif_table_command = """
-CREATE TABLE IF NOT EXISTS commemoratif (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    appel BOOLEAN NOT NULL,
-    mise_en_culture_ts TIMESTAMP NOT NULL,
-    mise_en_culture_technicien TEXT NOT NULL,
-    FOREIGN KEY (eleveur_id) REFERENCES eleveurs (id),
-    numero_vache TEXT,
-    rang_lactation INTEGER,
-    stade_lactation TEXT,
-    quartier TEXT,
-    chronocite TEXT,
-    gravite TEXT,
-    commentaires TEXT
-);
+create_eleveurs_table_command = """
+CREATE TABLE IF NOT EXISTS eleveurs (
+    eleveur_id integer PRIMARY KEY AUTOINCREMENT,
+    societe text,
+    nom text,
+    prenom text,
+    adresse text,
+    telephone text,
+    email text NOT NULL
+)
 """
 
 create_resultat_table_command = """
-CREATE TABLE IF NOT EXISTS resultat (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date_resultat_ts TIMESTAMP NOT NULL,
-    resultat TEXT NOT NULL,
-    traitement_imm TEXT,
-    traitement_inj TEXT,
-    traitement_tar TEXT,
-    commentaire TEXT,
-    epidemio TEXT,
-    prevention TEXT,
-    FOREIGN KEY (commemoratif_id) REFERENCES commemoratif (id)
+CREATE TABLE IF NOT EXISTS resultats (
+    resultat_id integer PRIMARY KEY AUTOINCREMENT,
+    date_resultat_ts timestamp NOT NULL,
+    resultat text NOT NULL,
+    traitement_imm text,
+    traitement_inj text,
+    traitement_tar text,
+    commentaire text,
+    epidemio text,
+    prevention text,
+    commemoratif_id integer,
+    FOREIGN KEY (commemoratif_id)
+        REFERENCES commemoratifs (commemoratif_id)
 )
 """
 
-create_eleveurs_table_command = """
-CREATE TABLE IF NOT EXISTS eleveurs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    societe TEXT,
-    nom TEXT,
-    prenom TEXT,
-    adresse TEXT,
-    telephone TEXT,
-    email TEXT NOT NULL
-)
+create_commemoratif_table_command = """
+CREATE TABLE IF NOT EXISTS commemoratifs (
+    commemoratif_id integer PRIMARY KEY AUTOINCREMENT,
+    appel boolean NOT NULL,
+    mise_en_culture_ts timestamp NOT NULL,
+    mise_en_culture_technicien text NOT NULL,
+    numero_vache text,
+    rang_lactation integer,
+    stade_lactation text,
+    quartier text,
+    chronicite text,
+    gravite text,
+    commentaires text,
+    eleveur_id integer NOT NULL,
+    FOREIGN KEY (eleveur_id)
+        REFERENCES eleveurs (eleveur_id)
+);
 """
 
 
-# Execute the SQL command
-cursor.execute(create_commemoratif_table_command)
+def init_db(conn: sqlite3.Connection):
+    """Create the tables in the database."""
 
-# Commit the changes
-conn.commit()
+    # Enable foreign key constraints
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.commit()
 
-# Close the database connection
-conn.close()
+    # Create the eleveurs table
+    print("Creating eleveurs table...")
+    conn.execute(create_eleveurs_table_command)
+    conn.commit()
 
-print("Database initialized successfully.")
+    # Create the commemoratif table
+    print("Creating commemoratif table...")
+    conn.execute(create_commemoratif_table_command)
+    conn.commit()
+
+    # Create the resultat table
+    print("Creating resultat table...")
+    conn.execute(create_resultat_table_command)
+    conn.commit()
+
+    # Close the connection
+    conn.close()
+
+    logger.info("Tables created successfully.")
+
+
+if __name__ == "__main__":
+    conn = connect_to_db()
+    init_db(conn)

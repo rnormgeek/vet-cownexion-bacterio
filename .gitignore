@@ -6,8 +6,14 @@ dist/
 wheels/
 *.egg-info
 
+# logs
+*.log
+
 # venv
 .venv
 
 # Mac
 .DS_Store
+
+# Database
+*.db
