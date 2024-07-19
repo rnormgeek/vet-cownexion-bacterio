@@ -1,28 +1,14 @@
-import sqlite3
-import vetcownect.CONSTANTS as CONSTANTS
+# this script will contain utility functions that will be used in the main script
 
 
-def check_db_exists() -> bool:
+def format_eleveur_for_selectbox(eleveur: dict) -> str:
     """
-    Check if the database exists.
+    Format the eleveur dictionary for the selectbox.
+
+    Args:
+        eleveur (dict): Eleveur data
+
+    Returns:
+        str: Formatted eleveur data
     """
-    try:
-        # Connect to the SQLite database
-        conn = sqlite3.connect(CONSTANTS.DATABASE_NAME)
-
-        # Close the connection
-        conn.close()
-
-        return True
-    except sqlite3.OperationalError:
-        return False
-
-
-def connect_to_db() -> sqlite3.Connection:
-    """
-    Connect to the SQLite database.
-    """
-    # Connect to the SQLite database
-    conn = sqlite3.connect(CONSTANTS.DATABASE_NAME)
-
-    return conn
+    return f"{eleveur['email']} ({eleveur['nom']} from {eleveur['societe']})"
